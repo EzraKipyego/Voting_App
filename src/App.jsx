@@ -60,8 +60,11 @@ function App() {
   const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex justify-center items-center p-4">
-      <div className="w-full max-w-xl bg-white shadow-lg rounded-xl p-6">
+  
+    <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center p-4">
+  <h1 className="text-2xl font-bold mb-4">Group 6</h1>
+
+  <div className="w-full max-w-xl bg-white shadow-lg rounded-xl p-6">
 
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
           Class Representative Voting App

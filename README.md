@@ -65,8 +65,7 @@ cd Voting_App
  ## License
 This project is licensed under the [MIT License](LICENSE).
 
-## Author
-Ezra Kipyego
+## Authors
 Group Project – Academic Voting Poll System.
 
 

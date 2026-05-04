@@ -66,11 +66,13 @@ cd Voting_App
 This project is licensed under the [MIT License](LICENSE).
 
 ## Authors
-Ezra 
-Erick
-Kelvi
-Cherop
+Ezra ,
+Erick ,
+Kelvin,
+Cherop,
+and 
 Precious
+
 
 
 

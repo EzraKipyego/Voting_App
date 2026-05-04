@@ -66,12 +66,11 @@ cd Voting_App
 This project is licensed under the [MIT License](LICENSE).
 
 ## Authors
-Ezra- Create the main folder and repository 
-Me- PollOption
-Kelvin- PollForm
-Cherop- PollList
-Precious- ReadMe
-And ~Have to do App
+Ezra 
+Erick
+Kelvi
+Cherop
+Precious
 
 
 

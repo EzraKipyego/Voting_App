@@ -12,8 +12,8 @@ import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.
 // 🔑 REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com", // Required for Realtime DB
+    authDomain: "https://ezrakipyego.github.io/Voting_App/.firebaseapp.com",
+    databaseURL: "https://https://ezrakipyego.github.io/Voting_App/-default-rtdb.firebaseio.com", // Required for Realtime DB
     projectId: "YOUR_PROJECT_ID",
     storageBucket: "YOUR_PROJECT.appspot.com",
     messagingSenderId: "YOUR_SENDER_ID",

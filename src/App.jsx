@@ -3,31 +3,22 @@ const PollForm = lazy(() => import ("./components/PollForm"))
 const PollList = lazy(() => import ("./components/PollList"))
 
 function App() {
-  const [options, setOptions] = useState(() => {
-    const saved = localStorage.getItem("pollOptions");
-    return saved
-      ? JSON.parse(saved)
-      : [
-          { id: 1, text: "Class Representative A (Kelvin Omondi)", votes: 0 },
-          { id: 2, text: "Class Representative B (Precious Njeru)", votes: 0 },
-          { id: 3, text: "Class Representative C(George Mwangi)", votes: 0 },
-        ];
-  });
+  const [options, setOptions] = useState([]);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [voteHistory, setVoteHistory] = useState(0);
 
-  const [hasVoted, setHasVoted] = useState(() => {
-    return JSON.parse(localStorage.getItem("hasVoted")) || false;
-  });
+  
 
-  //  all the  votes  tracked here.
-  const [voteHistory, setVoteHistory] = useState(() => {
-    return JSON.parse(localStorage.getItem("voteHistory")) || 0;
-  });
 
   useEffect(() => {
-    localStorage.setItem("pollOptions", JSON.stringify(options));
-    localStorage.setItem("hasVoted", JSON.stringify(hasVoted));
-    localStorage.setItem("voteHistory", JSON.stringify(voteHistory));
-  }, [options, hasVoted, voteHistory]);
+    fetch("http://localhost:3000/polls/1")
+      .then((res) => res.json())
+      .then((data) => 
+        setOptions(data.options));
+      }, []);
+
+  }
+  
 
   const addOption = (text) => {
     if (!text.trim()) return;
@@ -48,22 +39,50 @@ function App() {
       votes: 0,
     };
 
-    setOptions([...options, newOption]);
+    
+    const updated = [...options, newOption];
+    setOptions(updated);
   };
+
+  fetch("http://localhost:3000/polls/1", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ options:updated }),
+  });
 
   const vote = (id) => {
     if (hasVoted) return;
 
-    const updated = options.map((opt) =>
-      opt.id === id ? { ...opt, votes: opt.votes + 1 } : opt
-    );
+    const updated = options.map((opt) => {
+      if (opt.id === id) {
+        return { ...opt, votes: opt.votes + 1 };
+      }
+      return opt;
+    });
 
     setOptions(updated);
     setHasVoted(true);
-
-  
     setVoteHistory(voteHistory + 1);
-  };
+  }
+
+  fetch("http://localhost:3000/polls/1", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ options:updated }),
+  });
+
+  fetch("http://localhost:3000/votes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pollId: 1, choiceId: id }),
+  });
+
 
   const resetVotes = () => {
     const reset = options.map((opt) => ({
@@ -73,7 +92,14 @@ function App() {
 
     setOptions(reset);
     setHasVoted(false);
-    localStorage.removeItem("hasVoted");
+
+    fetch("http://localhost:3000/polls/1", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ options:reset }),
+    });
   };
 
   const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0);
@@ -111,6 +137,5 @@ function App() {
       </div>
     </div>
   );
-}
 
 export default App;

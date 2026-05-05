@@ -8,16 +8,17 @@ import {
     onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{getRedirectResult}from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // 🔑 REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "https://ezrakipyego.github.io/Voting_App/.firebaseapp.com",
-    databaseURL: "https://https://ezrakipyego.github.io/Voting_App/-default-rtdb.firebaseio.com", // Required for Realtime DB
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB0gSeO4_6bJQRsPcJZ7VN5an0HPt-yZLQ",
+  authDomain: "voting-app-71285.firebaseapp.com",
+  projectId: "voting-app-71285",
+  storageBucket: "voting-app-71285.firebasestorage.app",
+  messagingSenderId: "1013925105423",
+  appId: "1:1013925105423:web:64925a13d297186e89787a",
+  measurementId: "G-7311HM8ZP5"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -87,7 +88,7 @@ mainBtn.addEventListener('click', async () => {
 // 3. Google Sign In
 googleBtn.addEventListener('click', async () => {
     try {
-        const result = await signInWithPopup(auth, provider);
+        const result = await signInWithRedirect(auth, provider);
         const user = result.user;
 
         //  SAVE/UPDATE USER IN REALTIME DB ON GOOGLE LOGIN
@@ -117,9 +118,16 @@ function simplifyError(code) {
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("User is logged in:", user.email);
-        // Optional: Auto-redirect if already logged in
-        // window.location.href = "/dashboard.html";
+        window.location.href = "/dashboard.html";
+        window.location.href = "/dashboard.html";    
     }
 });
+getRedirectResult(auth).then((result) => {
+    if (result) {
+    console.log("redirect login success:", result.user.email);
+     window.location.href = "/dashboard.html";
+    }
+});
+
 
 

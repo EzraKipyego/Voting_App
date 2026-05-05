@@ -45,3 +45,9 @@ if (isLogin) {
 //  Redirect here
 window.location.href = "pollform.html";
 export default index.js;
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        window.location.href = "pollform.html";
+    }
+});

@@ -11,6 +11,16 @@ function PollForm({ addOption }) {
     addOption(text);
     setText("");
   };
+  import { getAuth, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const auth = getAuth();
+
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location.href = "index.html";
+    }
+});
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 mb-6">

@@ -18,7 +18,7 @@ function App() {
     return JSON.parse(localStorage.getItem("hasVoted")) || false;
   });
 
-  // Tracks all the  votes 
+  //  all the  votes  tracked here.
   const [voteHistory, setVoteHistory] = useState(() => {
     return JSON.parse(localStorage.getItem("voteHistory")) || 0;
   });
@@ -87,7 +87,7 @@ function App() {
           Class Representative Voting App
         </h1>
 
-        {/* Historical Vote Tracking */}
+        {/* Track votes */}
         <p className="text-center text-gray-600 mb-6">
           Total Votes Ever Cast: {voteHistory}
         </p>

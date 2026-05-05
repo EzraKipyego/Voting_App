@@ -11,13 +11,13 @@ import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.
 
 // 🔑 REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "https://ezrakipyego.github.io/Voting_App/.firebaseapp.com",
-    databaseURL: "https://https://ezrakipyego.github.io/Voting_App/-default-rtdb.firebaseio.com", // Required for Realtime DB
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB0gSeO4_6bJQRsPcJZ7VN5an0HPt-yZLQ",
+  authDomain: "voting-app-71285.firebaseapp.com",
+  projectId: "voting-app-71285",
+  storageBucket: "voting-app-71285.firebasestorage.app",
+  messagingSenderId: "1013925105423",
+  appId: "1:1013925105423:web:64925a13d297186e89787a",
+  measurementId: "G-7311HM8ZP5"
 };
 
 const app = initializeApp(firebaseConfig);

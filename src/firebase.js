@@ -8,6 +8,7 @@ import {
     onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{getRedirectResult}from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // 🔑 REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
@@ -87,7 +88,7 @@ mainBtn.addEventListener('click', async () => {
 // 3. Google Sign In
 googleBtn.addEventListener('click', async () => {
     try {
-        const result = await signInWithPopup(auth, provider);
+        const result = await signInWithRedirect(auth, provider);
         const user = result.user;
 
         //  SAVE/UPDATE USER IN REALTIME DB ON GOOGLE LOGIN
@@ -117,9 +118,16 @@ function simplifyError(code) {
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("User is logged in:", user.email);
-        // Optional: Auto-redirect if already logged in
-        // window.location.href = "/dashboard.html";
+        window.location.href = "/dashboard.html";
+        window.location.href = "/dashboard.html";    
     }
 });
+getRedirectResult(auth).then((result) => {
+    if (result) {
+    console.log("redirect login success:", result.user.email);
+     window.location.href = "/dashboard.html";
+    }
+});
+
 
 

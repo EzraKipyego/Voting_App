@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import PollForm from "./components/PollForm";
 import PollList from "./components/PollList";
+import Footer from "./pages/Footer";
+import Home from "./pages/Home";
+import Navbar from "./pages/navbar";
+import { BrowserRouter,Routes, Route } from "react-router-dom";
 
 function App() {
   const [options, setOptions] = useState(() => {
@@ -12,6 +16,7 @@ function App() {
           { id: 2, text: "Class Representative B", votes: 0 },
           { id: 3, text: "Class Representative C", votes: 0 },
         ];
+
   });
 
   const [hasVoted, setHasVoted] = useState(() => {
@@ -60,6 +65,11 @@ function App() {
   const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0);
 
   return (
+       <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
     <div className="min-h-screen bg-slate-100 flex justify-center items-center p-4">
       <div className="w-full max-w-xl bg-white shadow-lg rounded-xl p-6">
 
@@ -85,6 +95,9 @@ function App() {
 
       </div>
     </div>
+
+    <Footer />
+    </BrowserRouter>
   );
 }
 

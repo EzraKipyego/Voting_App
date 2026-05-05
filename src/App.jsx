@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import PollForm from "./components/PollForm";
-import PollList from "./components/PollList";
+import { useState, useEffect, lazy, Suspense } from "react";
+const PollForm = lazy(() => import ("./components/PollForm"))
+const PollList = lazy(() => import ("./components/PollList"))
 
 function App() {
   const [options, setOptions] = useState(() => {
@@ -91,8 +91,9 @@ function App() {
         <p className="text-center text-gray-600 mb-6">
           Total Votes Ever Cast: {voteHistory}
         </p>
-
         <PollForm addOption={addOption} />
+        <Suspense fallback={<p>Loading..</p>}> {/*Added Suspense for Lazy Loading*/}
+        
 
         <PollList
           options={options}
@@ -100,7 +101,7 @@ function App() {
           hasVoted={hasVoted}
           totalVotes={totalVotes}
         />
-
+        </Suspense>
         <button
           onClick={resetVotes}
           className="w-full mt-6 bg-blue-500 text-white py-2 rounded hover:bg-blue-600"

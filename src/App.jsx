@@ -11,7 +11,7 @@ function App() {
 
 
   useEffect(() => {
-    fetch("http://localhost:3000/polls/1")
+    fetch("http://localhost:3001/polls/1")
       .then((res) => res.json())
       .then((data) => 
         setOptions(data.options));
@@ -44,7 +44,7 @@ function App() {
     setOptions(updated);
   };
 
-  fetch("http://localhost:3000/polls/1", {
+  fetch("http://localhost:3001/polls/1", {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -67,7 +67,7 @@ function App() {
     setVoteHistory(voteHistory + 1);
   }
 
-  fetch("http://localhost:3000/polls/1", {
+  fetch("http://localhost:3001/polls/1", {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -75,7 +75,7 @@ function App() {
     body: JSON.stringify({ options:updated }),
   });
 
-  fetch("http://localhost:3000/votes", {
+  fetch("http://localhost:3001/votes", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -93,7 +93,7 @@ function App() {
     setOptions(reset);
     setHasVoted(false);
 
-    fetch("http://localhost:3000/polls/1", {
+    fetch("http://localhost:3001/polls/1", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

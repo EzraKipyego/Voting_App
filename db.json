@@ -1,0 +1,15 @@
+{
+    "polls":[
+        {
+            "id":1,
+            "question":"Who is your class representative?",
+            "options":[
+                {"option":"Class Rep A (Kelvin Omondi)","votes":0},
+                {"option":"Class Rep B (Precious Njeru)","votes":0},
+                {"option":"Class Rep C(George Mwangi)","votes":0},
+                {"option":"Class Rep D (Marian Adisa)","votes":0}
+            ]
+        }
+    ],
+    "votes":[]
+}

@@ -7,25 +7,30 @@ import {
     GoogleAuthProvider,
     onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// 🔑 REPLACE WITH YOUR CONFIG
+import { 
+    getDatabase, 
+    ref, 
+    set, 
+    update 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+//  REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "https://ezrakipyego.github.io/Voting_App/.firebaseapp.com",
-    databaseURL: "https://https://ezrakipyego.github.io/Voting_App/-default-rtdb.firebaseio.com", // Required for Realtime DB
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB0gSeO4_6bJQRsPcJZ7VN5an0HPt-yZLQ",
+  authDomain: "voting-app-71285.firebaseapp.com",
+  projectId: "voting-app-71285",
+  storageBucket: "voting-app-71285.firebasestorage.app",
+  messagingSenderId: "1013925105423",
+  appId: "1:1013925105423:web:64925a13d297186e89787a",
+  measurementId: "G-7311HM8ZP5"
 };
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getDatabase(app); // Initialize Realtime Database
+const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 
-// DOM Elements
+// DOM
 const emailInput = document.getElementById('email');
 const passInput = document.getElementById('password');
 const mainBtn = document.getElementById('mainBtn');
@@ -35,91 +40,114 @@ const title = document.getElementById('title');
 const errorMsg = document.getElementById('error');
 const switchMsg = document.getElementById('switchMsg');
 
-let isLogin = true; // State toggle
+let isLogin = true;
 
-// 1. Toggle between Login and Signup
+// Toggle UI
 switchLink.addEventListener('click', (e) => {
     e.preventDefault();
     isLogin = !isLogin;
+
     title.innerText = isLogin ? "Login" : "Sign Up";
     mainBtn.innerText = isLogin ? "Log In" : "Sign Up";
-    switchMsg.innerText = isLogin ? "Don't have an account?" : "Already have an account?";
+    switchMsg.innerText = isLogin 
+        ? "Don't have an account?" 
+        : "Already have an account?";
     switchLink.innerText = isLogin ? "Sign Up" : "Log In";
+
     errorMsg.innerText = "";
 });
 
-// 2. Main Button Handler (Email/Pass)
+// Validate email
+function isValidEmail(email) {
+    return /\S+@\S+\.\S+/.test(email);
+}
+
+// Main auth
 mainBtn.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passInput.value;
+    const email = emailInput.value.trim();
+    const password = passInput.value.trim();
+
     errorMsg.innerText = "";
 
     if (!email || !password) {
-        errorMsg.innerText = "Please fill in all fields";
+        errorMsg.innerText = "Fill all fields";
         return;
     }
 
+    if (!isValidEmail(email)) {
+        errorMsg.innerText = "Invalid email format";
+        return;
+    }
+
+    mainBtn.disabled = true;
+
     try {
         let userCredential;
+
         if (isLogin) {
-            // LOGIN
             userCredential = await signInWithEmailAndPassword(auth, email, password);
         } else {
-            // SIGN UP
             userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            
-            // SAVE TO REALTIME DATABASE
+
             const user = userCredential.user;
+
             await set(ref(db, 'users/' + user.uid), {
                 username: email.split('@')[0],
                 email: email,
+                createdAt: Date.now(),
                 lastLogin: Date.now()
             });
         }
-        alert("Success! Welcome " + userCredential.user.email);
-        // window.location.href = "/dashboard.html"; 
+
+        // Update last login safely
+        await update(ref(db, 'users/' + userCredential.user.uid), {
+            lastLogin: Date.now()
+        });
+
+        alert("Welcome " + userCredential.user.email);
+
+        // Redirect example
+        // window.location.href = "vote.html";
 
     } catch (error) {
         errorMsg.innerText = simplifyError(error.code);
     }
+
+    mainBtn.disabled = false;
 });
 
-// 3. Google Sign In
+// Google login
 googleBtn.addEventListener('click', async () => {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        //  SAVE/UPDATE USER IN REALTIME DB ON GOOGLE LOGIN
-        await set(ref(db, 'users/' + user.uid), {
+        await update(ref(db, 'users/' + user.uid), {
             username: user.displayName,
             email: user.email,
             photo: user.photoURL,
             lastLogin: Date.now()
         });
 
-        alert("Google Login Success!");
+        alert("Google login success");
+
     } catch (error) {
         errorMsg.innerText = simplifyError(error.code);
     }
 });
 
-// Helper: Clean Error Messages
+// Error messages
 function simplifyError(code) {
-    if (code.includes('wrong-password')) return "Wrong password.";
-    if (code.includes('user-not-found')) return "No user found with this email.";
-    if (code.includes('email-already-in-use')) return "Email already registered.";
-    if (code.includes('weak-password')) return "Password must be at least 6 chars.";
-    return "An error occurred. Try again.";
+    if (code.includes('wrong-password')) return "Wrong password";
+    if (code.includes('user-not-found')) return "User not found";
+    if (code.includes('email-already-in-use')) return "Email already exists";
+    if (code.includes('weak-password')) return "Password must be 6+ chars";
+    return "Something went wrong";
 }
 
-// 4. Check if user is already logged in
+// Auth state
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        console.log("User is logged in:", user.email);
-        // Optional: Auto-redirect if already logged in
-        // window.location.href = "/dashboard.html";
+        console.log("Logged in:", user.email);
     }
 });
-
-

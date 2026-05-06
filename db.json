@@ -4,10 +4,10 @@
             "id":1,
             "question":"Who is your class representative?",
             "options":[
-                {"option":"Class Rep A (Kelvin Omondi)","votes":0},
-                {"option":"Class Rep B (Precious Njeru)","votes":0},
-                {"option":"Class Rep C(George Mwangi)","votes":0},
-                {"option":"Class Rep D (Marian Adisa)","votes":0}
+                {"id":1,"text":"Class Rep A (Kelvin Omondi)","votes":0},
+                {"id":2,"text":"Class Rep B (Precious Njeru)","votes":0},
+                {"id":3,"text":"Class Rep C (George Mwangi)","votes":0},
+                {"id":4,"text":"Class Rep D (Marian Adisa)","votes":0}
             ]
         }
     ],

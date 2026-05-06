@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | VoteNow</title>
+  </head>
+  <body>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: #0f172a;
+        color: white;
+      }
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 10%;
+        background: #020617;
+      }
+
+      .navbar a {
+        color: #cbd5f5;
+        text-decoration: none;
+      }
+
+      .card {
+        width: min(92vw, 380px);
+        margin: 80px auto;
+        background: #1e293b;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+      }
+
+      h2,
+      input,
+      button,
+      .divider,
+      .switch-text {
+        margin-bottom: 15px;
+      }
+
+      input,
+      button {
+        width: 100%;
+        padding: 12px;
+        border: 0;
+        border-radius: 8px;
+      }
+
+      input {
+        background: #334155;
+        color: white;
+      }
+
+      button {
+        background: #2563eb;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      .google-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: white;
+        color: #111827;
+      }
+
+      .error {
+        color: #fca5a5;
+        min-height: 20px;
+      }
+
+      .switch-text a {
+        color: #60a5fa;
+      }
+    </style>
+
+    <nav class="navbar">
+      <h2>VoteNow</h2>
+      <a href="index.html">Home</a>
+    </nav>
+
+    <div class="card">
+      <h2 id="title">Login</h2>
+      <p id="error" class="error"></p>
+
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+
+      <button id="mainBtn">Log In</button>
+
+      <div class="divider">OR</div>
+
+      <button id="googleBtn" class="google-btn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="" />
+        Sign in with Google
+      </button>
+
+      <p class="switch-text">
+        <span id="switchMsg">Don't have an account?</span>
+        <a href="#" id="switchLink">Sign Up</a>
+      </p>
+    </div>
+
+    <script type="module" src="/src/firebase.js"></script>
+  </body>
+</html>

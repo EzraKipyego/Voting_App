@@ -45,7 +45,7 @@ function Login() {
     try {
       await signInWithPopup(auth, provider);
       navigate("/poll");
-    } catch (err) {
+    } catch {
       setError("Google login failed");
     }
   };

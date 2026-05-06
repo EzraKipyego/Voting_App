@@ -3,21 +3,57 @@ import PollForm from "./components/PollForm";
 import PollList from "./components/PollList";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  getFirestore,
+  onSnapshot,
+  runTransaction,
+  setDoc,
+} from "firebase/firestore";
 import { firebaseConfig } from "./firebaseConfig";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+const pollRef = doc(db, "polls", "class-representative");
+const defaultOptions = [
+  { id: 1, text: "Class Representative A", votes: 0 },
+  { id: 2, text: "Class Representative B", votes: 0 },
+  { id: 3, text: "Class Representative C", votes: 0 },
+];
+
+function normalizeOptions(options) {
+  if (!Array.isArray(options)) return defaultOptions;
+
+  return options.map((opt, index) => ({
+    id: opt.id ?? index + 1,
+    text: opt.text ?? opt.option ?? `Option ${index + 1}`,
+    votes: Number(opt.votes) || 0,
+  }));
+}
+
+function saveOptions(options) {
+  localStorage.setItem("pollOptions", JSON.stringify(options));
+}
+
+async function ensurePollExists() {
+  const snapshot = await getDoc(pollRef);
+
+  if (!snapshot.exists()) {
+    await setDoc(pollRef, {
+      question: "Who is your class representative?",
+      options: defaultOptions,
+      voters: {},
+      updatedAt: Date.now(),
+    });
+  }
+}
 
 function App() {
   const [options, setOptions] = useState(() => {
     const saved = localStorage.getItem("pollOptions");
-    return saved
-      ? JSON.parse(saved)
-      : [
-          { id: 1, text: "Class Representative A", votes: 0 },
-          { id: 2, text: "Class Representative B", votes: 0 },
-          { id: 3, text: "Class Representative C", votes: 0 },
-        ];
+    return saved ? normalizeOptions(JSON.parse(saved)) : defaultOptions;
   });
 
   const [hasVoted, setHasVoted] = useState(() => {
@@ -27,6 +63,7 @@ function App() {
   const [voteHistory, setVoteHistory] = useState(0);
   const [authChecked, setAuthChecked] = useState(false);
   const [user, setUser] = useState(null);
+  const [pollError, setPollError] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -42,14 +79,38 @@ function App() {
 
   useEffect(() => {
     if (!user) return;
-    fetch("http://localhost:3000/polls/1")
-      .then((res) => res.json())
-      .then((data) => setOptions(data.options))
-      .catch((err) => console.error("Error fetching polls:", err));
+
+    ensurePollExists().catch((err) => {
+      console.info("Could not create Firestore poll:", err.message);
+      setPollError("Live voting is not connected yet. Enable Firestore for shared votes.");
+    });
+
+    const unsubscribe = onSnapshot(
+      pollRef,
+      (snapshot) => {
+        if (!snapshot.exists()) return;
+
+        const data = snapshot.data();
+        const normalized = normalizeOptions(data.options);
+        const voters = data.voters || {};
+
+        setOptions(normalized);
+        setHasVoted(Boolean(voters[user.uid]));
+        saveOptions(normalized);
+        localStorage.setItem("hasVoted", JSON.stringify(Boolean(voters[user.uid])));
+        setPollError("");
+      },
+      (err) => {
+        console.info("Using local poll data:", err.message);
+        setPollError("Live voting is not connected yet. Enable Firestore for shared votes.");
+      }
+    );
+
+    return () => unsubscribe();
   }, [user]);
   
 
-  const addOption = (text) => {
+  const addOption = async (text) => {
     if (!text.trim()) return;
 
     // Prevent duplicate poll options (case-insensitive)
@@ -71,18 +132,41 @@ function App() {
     
     const updated = [...options, newOption];
     setOptions(updated);
+    saveOptions(updated);
 
-    // Update JSON server
-    fetch("http://localhost:3000/polls/1", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ options: updated }),
-    }).catch((err) => console.error("Error updating polls:", err));
+    try {
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(pollRef);
+        const currentOptions = normalizeOptions(snapshot.data()?.options);
+        const alreadyExists = currentOptions.some(
+          (opt) => opt.text.toLowerCase() === text.trim().toLowerCase()
+        );
+
+        if (alreadyExists) {
+          throw new Error("duplicate-option");
+        }
+
+        transaction.set(
+          pollRef,
+          {
+            question: snapshot.data()?.question || "Who is your class representative?",
+            options: [...currentOptions, newOption],
+            voters: snapshot.data()?.voters || {},
+            updatedAt: Date.now(),
+          },
+          { merge: true }
+        );
+      });
+    } catch (err) {
+      if (err.message === "duplicate-option") {
+        alert("This poll option already exists!");
+      } else {
+        setPollError("Could not save this option online. Check Firestore setup.");
+      }
+    }
   };
 
-  const vote = (id) => {
+  const vote = async (id) => {
     if (hasVoted) return;
 
     const updated = options.map((opt) => {
@@ -95,27 +179,51 @@ function App() {
     setOptions(updated);
     setHasVoted(true);
     setVoteHistory(voteHistory + 1);
+    saveOptions(updated);
+    localStorage.setItem("hasVoted", JSON.stringify(true));
 
-    // Update JSON server with new votes
-    fetch("http://localhost:3000/polls/1", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ options: updated }),
-    }).catch((err) => console.error("Error updating votes:", err));
+    try {
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(pollRef);
+        const data = snapshot.data() || {};
+        const voters = data.voters || {};
 
-    // Record vote in votes table
-    fetch("http://localhost:3000/votes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ pollId: 1, choiceId: id }),
-    }).catch((err) => console.error("Error recording vote:", err));
+        if (voters[user.uid]) {
+          throw new Error("already-voted");
+        }
+
+        const nextOptions = normalizeOptions(data.options).map((opt) =>
+          opt.id === id ? { ...opt, votes: opt.votes + 1 } : opt
+        );
+
+        transaction.set(
+          pollRef,
+          {
+            question: data.question || "Who is your class representative?",
+            options: nextOptions,
+            voters: {
+              ...voters,
+              [user.uid]: id,
+            },
+            updatedAt: Date.now(),
+          },
+          { merge: true }
+        );
+      });
+    } catch (err) {
+      if (err.message === "already-voted") {
+        setHasVoted(true);
+        return;
+      }
+
+      setOptions(options);
+      setHasVoted(false);
+      localStorage.setItem("hasVoted", JSON.stringify(false));
+      setPollError("Could not record your vote online. Check Firestore setup.");
+    }
   };
 
-  const resetVotes = () => {
+  const resetVotes = async () => {
     const reset = options.map((opt) => ({
       ...opt,
       votes: 0,
@@ -123,14 +231,23 @@ function App() {
 
     setOptions(reset);
     setHasVoted(false);
+    saveOptions(reset);
+    localStorage.setItem("hasVoted", JSON.stringify(false));
 
-    fetch("http://localhost:3000/polls/1", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ options: reset }),
-    }).catch((err) => console.error("Error resetting votes:", err));
+    try {
+      await setDoc(
+        pollRef,
+        {
+          question: "Who is your class representative?",
+          options: reset,
+          voters: {},
+          updatedAt: Date.now(),
+        },
+        { merge: true }
+      );
+    } catch {
+      setPollError("Could not reset online votes. Check Firestore setup.");
+    }
   };
 
   const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0);
@@ -165,6 +282,11 @@ function App() {
         <p className="text-center text-gray-600 mb-6">
           Total Votes Ever Cast: {voteHistory}
         </p>
+        {pollError && (
+          <p className="mb-4 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800">
+            {pollError}
+          </p>
+        )}
         <PollForm addOption={addOption} />
         <PollList
           options={options}

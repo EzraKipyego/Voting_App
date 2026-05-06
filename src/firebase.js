@@ -7,12 +7,10 @@ import {
     GoogleAuthProvider,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { firebaseConfig } from "./firebaseConfig.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 
 // DOM
@@ -73,20 +71,7 @@ mainBtn.addEventListener('click', async () => {
             userCredential = await signInWithEmailAndPassword(auth, email, password);
         } else {
             userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-            const user = userCredential.user;
-
-            await set(ref(db, 'users/' + user.uid), {
-                username: email.split('@')[0],
-                email: email,
-                createdAt: Date.now(),
-                lastLogin: Date.now()
-            });
         }
-
-        await update(ref(db, 'users/' + userCredential.user.uid), {
-            lastLogin: Date.now()
-        });
 
         alert("Success! Welcome " + userCredential.user.email);
         redirectToDashboard();
@@ -101,15 +86,7 @@ mainBtn.addEventListener('click', async () => {
 // Google login
 googleBtn.addEventListener('click', async () => {
     try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-
-        await update(ref(db, 'users/' + user.uid), {
-            username: user.displayName,
-            email: user.email,
-            photo: user.photoURL,
-            lastLogin: Date.now()
-        });
+        await signInWithPopup(auth, provider);
 
         alert("Google Login Success!");
         redirectToDashboard();

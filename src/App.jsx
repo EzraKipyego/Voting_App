@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import PollForm from "./components/PollForm";
 import PollList from "./components/PollList";
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { firebaseConfig } from "./firebaseConfig";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 function App() {
   const [options, setOptions] = useState(() => {
@@ -19,13 +25,28 @@ function App() {
   });
 
   const [voteHistory, setVoteHistory] = useState(0);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthChecked(true);
+      if (!currentUser) {
+        window.location.href = import.meta.env.BASE_URL;
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
     fetch("http://localhost:3000/polls/1")
       .then((res) => res.json())
       .then((data) => setOptions(data.options))
       .catch((err) => console.error("Error fetching polls:", err));
-  }, []);
+  }, [user]);
   
 
   const addOption = (text) => {
@@ -115,12 +136,31 @@ function App() {
 
   const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0);
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    window.location.href = import.meta.env.BASE_URL;
+  };
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <p className="text-gray-700">Checking login status...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 flex justify-center items-center p-4">
       <div className="w-full max-w-xl bg-white shadow-lg rounded-xl p-6">
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-2">
-          Class Representative Voting App
-        </h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold text-blue-600">Class Representative Voting App</h1>
+          <button
+            onClick={handleLogout}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Logout
+          </button>
+        </div>
 
         {/* Track votes */}
         <p className="text-center text-gray-600 mb-6">

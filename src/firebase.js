@@ -8,18 +8,8 @@ import {
     onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import{getRedirectResult}from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-// 🔑 REPLACE WITH YOUR CONFIG
-const firebaseConfig = {
-  apiKey: "AIzaSyB0gSeO4_6bJQRsPcJZ7VN5an0HPt-yZLQ",
-  authDomain: "voting-app-71285.firebaseapp.com",
-  projectId: "voting-app-71285",
-  storageBucket: "voting-app-71285.firebasestorage.app",
-  messagingSenderId: "1013925105423",
-  appId: "1:1013925105423:web:64925a13d297186e89787a",
-  measurementId: "G-7311HM8ZP5"
-};
+import { getRedirectResult } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { firebaseConfig } from "./firebaseConfig.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -78,7 +68,7 @@ mainBtn.addEventListener('click', async () => {
             });
         }
         alert("Success! Welcome " + userCredential.user.email);
-        // window.location.href = "/dashboard.html"; 
+        redirectToDashboard();
 
     } catch (error) {
         errorMsg.innerText = simplifyError(error.code);
@@ -88,7 +78,7 @@ mainBtn.addEventListener('click', async () => {
 // 3. Google Sign In
 googleBtn.addEventListener('click', async () => {
     try {
-        const result = await signInWithRedirect(auth, provider);
+        const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
         //  SAVE/UPDATE USER IN REALTIME DB ON GOOGLE LOGIN
@@ -100,6 +90,7 @@ googleBtn.addEventListener('click', async () => {
         });
 
         alert("Google Login Success!");
+        redirectToDashboard();
     } catch (error) {
         errorMsg.innerText = simplifyError(error.code);
     }
@@ -114,18 +105,21 @@ function simplifyError(code) {
     return "An error occurred. Try again.";
 }
 
+function redirectToDashboard() {
+    window.location.href = `${import.meta.env.BASE_URL}dashboard.html`;
+}
+
 // 4. Check if user is already logged in
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("User is logged in:", user.email);
-        window.location.href = "/dashboard.html";
-        window.location.href = "/dashboard.html";    
+        redirectToDashboard();
     }
 });
 getRedirectResult(auth).then((result) => {
     if (result) {
-    console.log("redirect login success:", result.user.email);
-     window.location.href = "/dashboard.html";
+        console.log("redirect login success:", result.user.email);
+        redirectToDashboard();
     }
 });
 

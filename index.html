@@ -1,118 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voting app</title>
-    <link rel="stylesheet" href="style.css">
-   
+  <meta charset="UTF-8">
+  <title>VoteNow</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  
   <style>
-    body {
-    font-family: sans-serif;
-    background: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+    /* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-.card {
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    width: 320px;
-    text-align: center;
+body {
+  background: #0f172a;
+  color: white;
 }
 
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box;
-}
-button {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 5px;
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 10%;
+  background: #020617;
 }
 
-#mainBtn { background: #007bff; color: white; }
-#mainBtn:hover { background: #0056b3; }
-
-.google-btn {
-    background: white;
-    border: 1px solid #ddd;
-    color: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+.navbar h2 {
+  color: #3b82f6;
 }
-.google-btn:hover { background: #f8f9fa; }
 
-.divider { margin: 15px 0; color: #888; font-size: 0.8rem; }
-.error { color: red; font-size: 0.9rem; min-height: 1.2em; }
-.switch-text { margin-top: 15px; font-size: 0.9rem; }
-a { color: #007bff; text-decoration: none; }
+.navbar .btn {
+  background: #2563eb;
+  padding: 8px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: white;
+  transition: 0.3s;
+}
+
+.navbar .btn:hover {
+  background: #1d4ed8;
+}
+
+/* HERO */
+.hero {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to right, #020617, #1e293b);
+  text-align: center;
+  padding: 0 20px;
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.hero p {
+  color: #94a3b8;
+  margin-bottom: 25px;
+  font-size: 18px;
+}
+
+.cta {
+  background: #3b82f6;
+  padding: 12px 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: white;
+  transition: 0.3s;
+}
+
+.cta:hover {
+  background: #2563eb;
+}
+
+/* FEATURES SECTION */
+.features {
+  padding: 60px 10%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+/* CARD */
+.feature {
+  background: #1e293b;
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.feature img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.feature h3 {
+  margin: 15px 0 10px;
+}
+
+.feature p {
+  color: #94a3b8;
+  padding: 0 15px 20px;
+}
+
+/* HOVER EFFECT */
+.feature:hover {
+  transform: translateY(-10px);
+  background: #334155;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+}
   </style>
 
-    <div class="card">
-        <h2 id="title">Login</h2>
-        <p id="error" class="error"></p>
-        
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        
-        <button id="mainBtn">Log In</button>
-        
-        <div class="divider">OR</div>
-        
-        <button id="googleBtn" class="google-btn">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
-            Sign in with Google
-        </button>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <h2> VoteNow</h2>
+  <div>
+    <a href="login.html" class="btn">Login</a>
+  </div>
+</nav>
 
-        <p class="switch-text">
-            <span id="switchMsg">Don't have an account?</span> 
-            <a href="#" id="switchLink">Sign Up</a>
-        </p>
-    </div>
+<!-- HERO SECTION -->
+<section class="hero">
+  <h1>Vote Smart. Decide Together.</h1>
+  <p>Create polls and let people vote in real-time.</p>
+  <a href="login.html" class="cta">Get Started</a>
+</section>
 
-    <!-- Import Firebase -->
-    <script type="module" src="/src/firebase.js"></script>
-     <script type="module" src="pollform.js"></script>
-      <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+<!-- IMAGES / FEATURES -->
+<section class="features">
 
-const firebaseConfig = {
-   apiKey: "AIzaSyB0gSeO4_6bJQRsPcJZ7VN5an0HPt-yZLQ",
-  authDomain: "voting-app-71285.firebaseapp.com",
-  projectId: "voting-app-71285",
-};
+  <div class="feature">
+    <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df" />
+    <h3>Create Polls</h3>
+    <p>Easily create questions and collect opinions.</p>
+  </div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+  <div class="feature">
+    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f" />
+    <h3>Vote Securely</h3>
+    <p>Only logged-in users can vote—no cheating.</p>
+  </div>
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    // Not logged in → send back
-    window.location.href = "index.html";
-  }
-});
-</script>
-    </script>
+  <div class="feature">
+    <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d" />
+    <h3>Real-Time Results</h3>
+    <p>See results instantly as votes come in.</p>
+  </div>
+
+</section>
 
 </body>
 </html>

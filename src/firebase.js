@@ -1,30 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    signInWithPopup, 
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signInWithPopup,
     GoogleAuthProvider,
-    onAuthStateChanged 
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { firebaseConfig } from "./firebaseConfig.js";
 
-import { 
-    getDatabase, 
-    ref, 
-    set, 
-    update 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-//  REPLACE WITH YOUR CONFIG
-const firebaseConfig = {
-  apiKey: "AIzaSyB0gSeO4_6bJQRsPcJZ7VN5an0HPt-yZLQ",
-  authDomain: "voting-app-71285.firebaseapp.com",
-  projectId: "voting-app-71285",
-  storageBucket: "voting-app-71285.firebasestorage.app",
-  messagingSenderId: "1013925105423",
-  appId: "1:1013925105423:web:64925a13d297186e89787a",
-  measurementId: "G-7311HM8ZP5"
-};
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
@@ -99,15 +84,12 @@ mainBtn.addEventListener('click', async () => {
             });
         }
 
-        // Update last login safely
         await update(ref(db, 'users/' + userCredential.user.uid), {
             lastLogin: Date.now()
         });
 
-        alert("Welcome " + userCredential.user.email);
-
-        // Redirect example
-        // window.location.href = "vote.html";
+        alert("Success! Welcome " + userCredential.user.email);
+        redirectToDashboard();
 
     } catch (error) {
         errorMsg.innerText = simplifyError(error.code);
@@ -129,8 +111,8 @@ googleBtn.addEventListener('click', async () => {
             lastLogin: Date.now()
         });
 
-        alert("Google login success");
-
+        alert("Google Login Success!");
+        redirectToDashboard();
     } catch (error) {
         errorMsg.innerText = simplifyError(error.code);
     }
@@ -145,9 +127,13 @@ function simplifyError(code) {
     return "Something went wrong";
 }
 
-// Auth state
+function redirectToDashboard() {
+    window.location.href = `${import.meta.env.BASE_URL}dashboard.html`;
+}
+
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        console.log("Logged in:", user.email);
+        console.log("User is logged in:", user.email);
+        redirectToDashboard();
     }
 });

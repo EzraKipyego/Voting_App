@@ -26,5 +26,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: "/Voting_App/"
+  base: process.env.NODE_ENV === 'production' ? '/Voting_App/' : '/',
+  server: {
+    port: 3000
+  }
 })

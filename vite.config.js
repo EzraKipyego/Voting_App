@@ -20,6 +20,18 @@
 //   }
 // })
 
+// import { defineConfig } from 'vite'
+// import react from '@vitejs/plugin-react'
+// import tailwindcss from '@tailwindcss/vite'
+
+// export default defineConfig({
+//   plugins: [react(), tailwindcss()],
+//   base: process.env.NODE_ENV === 'production' ? '/Voting_App/' : '/',
+//   server: {
+//     port: 3000
+//   }
+// })
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -30,17 +42,8 @@ const rootDir = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
-  base: mode === 'production' ? '/Voting_App/' : '/',
-  build: {
-    rollupOptions: {
-      input: {
-        main: resolve(rootDir, 'index.html'),
-        login: resolve(rootDir, 'login.html'),
-        dashboard: resolve(rootDir, 'dashboard.html'),
-      },
-    },
-  },
+  base: process.env.NODE_ENV === 'production' ? '/Voting_App/' : '/',
   server: {
     port: 3000
   }
-}))
+})

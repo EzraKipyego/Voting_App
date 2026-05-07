@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import PollForm from "./components/PollForm";
 import PollList from "./components/PollList";
 import { initializeApp } from "firebase/app";
@@ -18,9 +18,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const pollRef = doc(db, "polls", "class-representative");
 const defaultOptions = [
-  { id: 1, text: "Class Representative A", votes: 0 },
-  { id: 2, text: "Class Representative B", votes: 0 },
-  { id: 3, text: "Class Representative C", votes: 0 },
+  { id: 1, text: "Class Rep A (Kelvin Omondi)", votes: 0 },
+  { id: 2, text: "Class Rep B (Precious Njeru)", votes: 0 },
+  { id: 3, text: "Class Rep C (George Mwangi)", votes: 0 },
+  { id: 4, text: "Class Rep D (Marian Adisa)", votes: 0 },
 ];
 
 function normalizeOptions(options) {
@@ -55,23 +56,18 @@ function App() {
     const saved = localStorage.getItem("pollOptions");
     return saved ? normalizeOptions(JSON.parse(saved)) : defaultOptions;
   });
-
-  const [hasVoted, setHasVoted] = useState(() => {
-    return JSON.parse(localStorage.getItem("hasVoted")) || false;
-  });
-
-  const [voteHistory, setVoteHistory] = useState(0);
+  const [hasVoted, setHasVoted] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [user, setUser] = useState(null);
   const [pollError, setPollError] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("Firebase current user:", currentUser);
       setUser(currentUser);
       setAuthChecked(true);
+
       if (!currentUser) {
-        window.location.href = import.meta.env.BASE_URL;
+        window.location.href = `${import.meta.env.BASE_URL}login.html`;
       }
     });
 
@@ -83,7 +79,7 @@ function App() {
 
     ensurePollExists().catch((err) => {
       console.info("Could not create Firestore poll:", err.message);
-      setPollError("Live voting is not connected yet. Enable Firestore for shared votes.");
+      setPollError("Live voting is not connected yet. Check Firestore rules.");
     });
 
     const unsubscribe = onSnapshot(
@@ -94,32 +90,30 @@ function App() {
         const data = snapshot.data();
         const normalized = normalizeOptions(data.options);
         const voters = data.voters || {};
+        const voted = Boolean(voters[user.uid]);
 
         setOptions(normalized);
-        setHasVoted(Boolean(voters[user.uid]));
+        setHasVoted(voted);
         saveOptions(normalized);
-        localStorage.setItem("hasVoted", JSON.stringify(Boolean(voters[user.uid])));
+        localStorage.setItem("hasVoted", JSON.stringify(voted));
         setPollError("");
       },
       (err) => {
         console.info("Using local poll data:", err.message);
-        setPollError("Live voting is not connected yet. Enable Firestore for shared votes.");
+        setPollError("Live voting is not connected yet. Check Firestore rules.");
       }
     );
 
     return () => unsubscribe();
   }, [user]);
-  
 
   const addOption = async (text) => {
     if (!text.trim()) return;
     if (!user) {
       setPollError("You must be logged in before adding poll options.");
-      console.log("Firebase current user:", auth.currentUser);
       return;
     }
 
-    // Prevent duplicate poll options (case-insensitive)
     const exists = options.some(
       (opt) => opt.text.toLowerCase() === text.trim().toLowerCase()
     );
@@ -135,7 +129,6 @@ function App() {
       votes: 0,
     };
 
-    
     const updated = [...options, newOption];
     setOptions(updated);
     saveOptions(updated);
@@ -143,7 +136,8 @@ function App() {
     try {
       await runTransaction(db, async (transaction) => {
         const snapshot = await transaction.get(pollRef);
-        const currentOptions = normalizeOptions(snapshot.data()?.options);
+        const data = snapshot.data() || {};
+        const currentOptions = normalizeOptions(data.options);
         const alreadyExists = currentOptions.some(
           (opt) => opt.text.toLowerCase() === text.trim().toLowerCase()
         );
@@ -155,9 +149,9 @@ function App() {
         transaction.set(
           pollRef,
           {
-            question: snapshot.data()?.question || "Who is your class representative?",
+            question: data.question || "Who is your class representative?",
             options: [...currentOptions, newOption],
-            voters: snapshot.data()?.voters || {},
+            voters: data.voters || {},
             updatedAt: Date.now(),
           },
           { merge: true }
@@ -167,7 +161,7 @@ function App() {
       if (err.message === "duplicate-option") {
         alert("This poll option already exists!");
       } else {
-        setPollError("Could not save this option online. Check Firestore setup.");
+        setPollError("Could not save this option online. Check Firestore rules.");
       }
     }
   };
@@ -176,22 +170,16 @@ function App() {
     if (hasVoted) return;
     if (!user) {
       setPollError("You must be logged in before voting.");
-      console.log("Firebase current user:", auth.currentUser);
       return;
     }
 
-    console.log("Voting as Firebase user:", auth.currentUser);
-
-    const updated = options.map((opt) => {
-      if (opt.id === id) {
-        return { ...opt, votes: opt.votes + 1 };
-      }
-      return opt;
-    });
+    const previousOptions = options;
+    const updated = options.map((opt) =>
+      opt.id === id ? { ...opt, votes: opt.votes + 1 } : opt
+    );
 
     setOptions(updated);
     setHasVoted(true);
-    setVoteHistory(voteHistory + 1);
     saveOptions(updated);
     localStorage.setItem("hasVoted", JSON.stringify(true));
 
@@ -216,7 +204,12 @@ function App() {
             options: nextOptions,
             voters: {
               ...voters,
-              [user.uid]: id,
+              [user.uid]: {
+                optionId: id,
+                email: user.email || "",
+                name: user.displayName || user.email || "Voter",
+                votedAt: Date.now(),
+              },
             },
             updatedAt: Date.now(),
           },
@@ -229,17 +222,16 @@ function App() {
         return;
       }
 
-      setOptions(options);
+      setOptions(previousOptions);
       setHasVoted(false);
       localStorage.setItem("hasVoted", JSON.stringify(false));
-      setPollError("Could not record your vote online. Check Firestore setup.");
+      setPollError("Could not record your vote online. Check Firestore rules.");
     }
   };
 
   const resetVotes = async () => {
     if (!user) {
       setPollError("You must be logged in before resetting votes.");
-      console.log("Firebase current user:", auth.currentUser);
       return;
     }
 
@@ -265,16 +257,19 @@ function App() {
         { merge: true }
       );
     } catch {
-      setPollError("Could not reset online votes. Check Firestore setup.");
+      setPollError("Could not reset online votes. Check Firestore rules.");
     }
   };
 
-  const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0);
-
   const handleLogout = async () => {
+    localStorage.removeItem("hasVoted");
+    localStorage.removeItem("voterCode");
+    localStorage.removeItem("voterName");
     await signOut(auth);
-    window.location.href = import.meta.env.BASE_URL;
+    window.location.href = `${import.meta.env.BASE_URL}login.html`;
   };
+
+  const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0);
 
   if (!authChecked) {
     return (
@@ -288,7 +283,16 @@ function App() {
     <div className="min-h-screen bg-slate-100 flex justify-center items-center p-4">
       <div className="w-full max-w-xl bg-white shadow-lg rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-blue-600">Class Representative Voting App</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-blue-600">
+              Class Representative Voting App
+            </h1>
+            {user && (
+              <p className="mt-1 text-sm text-gray-500">
+                Signed in as {user.email || user.displayName}
+              </p>
+            )}
+          </div>
           <button
             onClick={handleLogout}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -297,15 +301,12 @@ function App() {
           </button>
         </div>
 
-        {/* Track votes */}
-        <p className="text-center text-gray-600 mb-6">
-          Total Votes Ever Cast: {voteHistory}
-        </p>
         {pollError && (
           <p className="mb-4 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800">
             {pollError}
           </p>
         )}
+
         <PollForm addOption={addOption} />
         <PollList
           options={options}

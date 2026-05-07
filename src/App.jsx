@@ -67,6 +67,7 @@ function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("Firebase current user:", currentUser);
       setUser(currentUser);
       setAuthChecked(true);
       if (!currentUser) {
@@ -112,6 +113,11 @@ function App() {
 
   const addOption = async (text) => {
     if (!text.trim()) return;
+    if (!user) {
+      setPollError("You must be logged in before adding poll options.");
+      console.log("Firebase current user:", auth.currentUser);
+      return;
+    }
 
     // Prevent duplicate poll options (case-insensitive)
     const exists = options.some(
@@ -168,6 +174,13 @@ function App() {
 
   const vote = async (id) => {
     if (hasVoted) return;
+    if (!user) {
+      setPollError("You must be logged in before voting.");
+      console.log("Firebase current user:", auth.currentUser);
+      return;
+    }
+
+    console.log("Voting as Firebase user:", auth.currentUser);
 
     const updated = options.map((opt) => {
       if (opt.id === id) {
@@ -224,6 +237,12 @@ function App() {
   };
 
   const resetVotes = async () => {
+    if (!user) {
+      setPollError("You must be logged in before resetting votes.");
+      console.log("Firebase current user:", auth.currentUser);
+      return;
+    }
+
     const reset = options.map((opt) => ({
       ...opt,
       votes: 0,

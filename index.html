@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VoteNow</title>
+</head>
+<body>
+  <style>
+    /* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  background: #0f172a;
+  color: white;
+}
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 10%;
+  background: #020617;
+}
+
+.navbar h2 {
+  color: #3b82f6;
+}
+
+.navbar .btn {
+  background: #2563eb;
+  padding: 8px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: white;
+  transition: 0.3s;
+}
+
+.navbar .btn:hover {
+  background: #1d4ed8;
+}
+
+/* HERO */
+.hero {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to right, #020617, #1e293b);
+  text-align: center;
+  padding: 0 20px;
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.hero p {
+  color: #94a3b8;
+  margin-bottom: 25px;
+  font-size: 18px;
+}
+
+.cta {
+  background: #3b82f6;
+  padding: 12px 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: white;
+  transition: 0.3s;
+}
+
+.cta:hover {
+  background: #2563eb;
+}
+
+/* FEATURES SECTION */
+.features {
+  padding: 60px 10%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+/* CARD */
+.feature {
+  background: #1e293b;
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.feature img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.feature h3 {
+  margin: 15px 0 10px;
+}
+
+.feature p {
+  color: #94a3b8;
+  padding: 0 15px 20px;
+}
+
+/* HOVER EFFECT */
+.feature:hover {
+  transform: translateY(-10px);
+  background: #334155;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+}
+  </style>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <h2> VoteNow</h2>
+  <div>
+    <a href="login.html" class="btn">Login</a>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <h1>Vote Smart. Decide Together.</h1>
+  <p>Create polls and let people vote in real-time.</p>
+  <a href="login.html" class="cta">Get Started</a>
+</section>
+
+<!-- IMAGES / FEATURES -->
+<section class="features">
+
+  <div class="feature">
+    <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df" />
+    <h3>Create Polls</h3>
+    <p>Easily create questions and collect opinions.</p>
+  </div>
+
+  <div class="feature">
+    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f" />
+    <h3>Vote Securely</h3>
+    <p>Only logged-in users can vote—no cheating.</p>
+  </div>
+
+  <div class="feature">
+    <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d" />
+    <h3>Real-Time Results</h3>
+    <p>See results instantly as votes come in.</p>
+  </div>
+
+</section>
+
+</body>
+</html>

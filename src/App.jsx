@@ -1,21 +1,15 @@
 import { useEffect, useState } from "react";
 import PollForm from "./components/PollForm";
 import PollList from "./components/PollList";
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
   doc,
   getDoc,
-  getFirestore,
   onSnapshot,
   runTransaction,
   setDoc,
 } from "firebase/firestore";
-import { firebaseConfig } from "./firebaseConfig";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { db, auth } from "./firebaseConfig";
 const pollRef = doc(db, "polls", "class-representative");
 const defaultOptions = [
   { id: 1, text: "Class Rep A (Kelvin Omondi)", votes: 0 },
